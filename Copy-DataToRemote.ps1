@@ -2,13 +2,13 @@
 # This is just a sample template to serve as an example of how SQL and SFTP tasks can be automated.
 # Please familiarize yourself with the code and packages and use at your own risk
 # Extract file(s) and send via SFTP
-# Automatically use the most recent db given the suffix
 [cmdletbinding()]
 param (
  [Parameter(Mandatory = $True)][string]$SQLServer,
  [Parameter(Mandatory = $True)][string]$SQLDatabase,
  [Parameter(Mandatory = $True)][System.Management.Automation.PSCredential]$SQLCredential,
- [Parameter(Mandatory = $True)][string]$SQLQuery,
+ [Parameter(Mandatory = $True)][string]$SQLQueryFile,
+ [Parameter(Mandatory = $True)][string]$SQLQueryStatement,
  [Parameter(Mandatory = $True)][string]$SftpServer,
  [Parameter(Mandatory = $True)][System.Management.Automation.PSCredential]$SftpCredential,
  [Parameter(Mandatory = $True)][string]$ExportName,
@@ -55,11 +55,15 @@ New-DataDir $outPath
 
 $fullExportPath = (Join-Path -Path $outPath -ChildPath $ExportName)
 
+$query = if ($SQLQueryFile) { Get-Content -Path $SQLQueryFile -Raw }
+elseif ($SQLQueryStatement) { $SQLQueryStatement }
+else { throw 'Either SQLQueryFile or SQLQueryStatement must be provided.' }
+
 $sqlParams = @{
  Server     = $SQLServer
  Database   = $SQLDatabase
  Credential = $SQLCredential
- Query      = Get-Content -Path $SQLQuery -Raw
+ Query      = $query
 }
 
 Get-Data $sqlParams | Export-Csv -NoTypeInformation -Path $fullExportPath
