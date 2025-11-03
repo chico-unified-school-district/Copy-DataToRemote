@@ -43,7 +43,9 @@ $sftpCred = Get-Credential -Message "Enter SFTP credentials"
     -SQLDatabase "StudentDB" `
     -SQLCredential $sqlCred `
     -SQLQuery ".\sql\student_export.sql" `
+    -RemoveDoubleQuotes `
     -SftpServer "sftp.vendor.com" `
+    -SftpPort 4545 `
     -SftpCredential $sftpCred `
     -ExportName "students.csv" `
     -RemoteDirectory "/incoming"
@@ -53,17 +55,20 @@ $sftpCred = Get-Credential -Message "Enter SFTP credentials"
 
 ## Parameters
 
-| Name              | Type                 | Description                              |
-| ----------------- | -------------------- | ---------------------------------------- |
-| `SQLServer`       | `string`             | SQL Server instance name or address      |
-| `SQLDatabase`     | `string`             | Name of the database to query            |
-| `SQLCredential`   | `PSCredential`       | SQL Server authentication credentials    |
-| `SQLQuery`        | `string` (file path) | Path to the SQL query file               |
-| `SftpServer`      | `string`             | SFTP server hostname or IP               |
-| `SftpCredential`  | `PSCredential`       | SFTP authentication credentials          |
-| `ExportName`      | `string`             | Name for the exported CSV file           |
-| `RemoteDirectory` | `string`             | Destination directory on the SFTP server |
-| `WhatIf`          | `switch` (optional)  | Preview actions without executing them   |
+| Name                 | Type                 | Description                              |
+| -------------------- | -------------------- | ---------------------------------------- |
+| `SQLServer`          | `string`             | SQL Server instance name or address      |
+| `SQLDatabase`        | `string`             | Name of the database to query            |
+| `SQLCredential`      | `PSCredential`       | SQL Server authentication credentials    |
+| `SQLQuery`           | `string` (file path) | Path to the SQL query file               |
+| `SQLQueryStatement`  | `string`             | SQL query statement as a string          |
+| `SftpServer`         | `string`             | SFTP server hostname or IP               |
+| `SftpPort`           | `int` (optional)     | SFTP server port (default is 22)         |
+| `SftpCredential`     | `PSCredential`       | SFTP authentication credentials          |
+| `ExportName`         | `string`             | Name for the exported CSV file           |
+| `RemoteDirectory`    | `string`             | Destination directory on the SFTP server |
+| `RemoveDoubleQuotes` | `switch` (optional)  | Remove double quotes from the CSV file   |
+| `WhatIf`             | `switch` (optional)  | Preview actions without executing them   |
 
 ---
 

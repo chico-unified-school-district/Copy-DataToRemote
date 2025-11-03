@@ -9,6 +9,7 @@ param (
  [Parameter(Mandatory = $True)][System.Management.Automation.PSCredential]$SQLCredential,
  [Parameter(Mandatory = $False)][string]$SQLQueryFile,
  [Parameter(Mandatory = $False)][string]$SQLQueryStatement,
+ [Parameter(Mandatory = $False)][switch]$RemoveDoubleQuotes,
  [Parameter(Mandatory = $True)][string]$SftpServer,
  [Parameter(Mandatory = $False)][int]$SftpPort = 22,
  [Parameter(Mandatory = $True)][System.Management.Automation.PSCredential]$SftpCredential,
@@ -44,6 +45,19 @@ function New-DataDir ($dataPath) {
  if (Test-Path -Path $dataPath) { return }
  New-Item -Path $dataPath -ItemType Directory -Confirm:$false -Force
 }
+
+function Remove-DoubleQuotes ($filePath) {
+ process {
+  Write-Host ('{0}' -f $MyInvocation.MyCommand.Name)
+  $csvContent = Get-Content -Path $filePath -Raw
+  # Remove double quotes from the CSV content
+  $csvContent = $csvContent.Replace('"', '')
+  Write-Host "Double quotes removed from '$filePath'."
+  # Write the modified content back to the CSV file
+  Set-Content -Path $filePath -Value $csvContent -Encoding UTF8
+ }
+}
+
 # ==================== Main =====================
 
 # Imported Functions
@@ -68,12 +82,8 @@ $sqlParams = @{
 }
 
 Get-Data $sqlParams | Export-Csv -NoTypeInformation -Path $fullExportPath
-$csvContent = Get-Content -Path $fullExportPath -Raw
-# Remove double quotes from the CSV content
-$csvContent = $csvContent.Replace('"', '')
-Write-Host "Double quotes removed from '$fullExportPath'."
-# Write the modified content back to the CSV file
-Set-Content -Path $fullExportPath -Value $csvContent -Encoding UTF8
+
+if ($RemoveDoubleQuotes) { Remove-DoubleQuotes -FilePath $fullExportPath }
 
 Copy-ExportToRemote $SftpServer $SftpPort $SftpCredential $fullExportPath $RemoteDirectory
 Remove-Item -Path $fullExportPath -Confirm:$false -Force
