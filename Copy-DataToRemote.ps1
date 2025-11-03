@@ -10,16 +10,17 @@ param (
  [Parameter(Mandatory = $False)][string]$SQLQueryFile,
  [Parameter(Mandatory = $False)][string]$SQLQueryStatement,
  [Parameter(Mandatory = $True)][string]$SftpServer,
+ [Parameter(Mandatory = $False)][int]$SftpPort = 22,
  [Parameter(Mandatory = $True)][System.Management.Automation.PSCredential]$SftpCredential,
  [Parameter(Mandatory = $True)][string]$ExportName,
  [Parameter(Mandatory = $True)][string]$RemoteDirectory,
  [Alias('wi')][switch]$WhatIf
 )
 
-function Copy-ExportToRemote ($server, $user, $exportPath, $destinationDirectory) {
+function Copy-ExportToRemote ($server, $port, $user, $exportPath, $destinationDirectory) {
  try {
   Write-Host ('{0}' -f $MyInvocation.MyCommand.Name)
-  $Session = New-SFTPSession -ComputerName $server -Credential $user -Port 22 -AcceptKey:$true
+  $Session = New-SFTPSession -ComputerName $server -Credential $user -Port $port -AcceptKey
   Set-SFTPItem -SessionId $Session.SessionId -Path $exportPath -Destination $destinationDirectory -Force -Verbose
  }
  catch {
@@ -74,5 +75,5 @@ Write-Host "Double quotes removed from '$fullExportPath'."
 # Write the modified content back to the CSV file
 Set-Content -Path $fullExportPath -Value $csvContent -Encoding UTF8
 
-Copy-ExportToRemote $SftpServer $SftpCredential $fullExportPath $RemoteDirectory
+Copy-ExportToRemote $SftpServer $SftpPort $SftpCredential $fullExportPath $RemoteDirectory
 Remove-Item -Path $fullExportPath -Confirm:$false -Force
